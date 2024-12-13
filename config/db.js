@@ -1,15 +1,14 @@
-const mysql = require('mysql2/promise'); // Ensure you're using the promise version  
-const dotenv = require('dotenv');  
+const mysql = require('mysql2');  // Ensure correct library is used  
+const dotenv = require('dotenv'); 
 
 dotenv.config();  
 
 const pool = mysql.createPool({  
-   host: process.env.DB_HOST,  
-   user: process.env.DB_USER,  
-   password: process.env.DB_PASSWORD,  
-   database: process.env.DB_NAME,  
-   port: process.env.DB_PORT,  
+    host: process.env.DB_HOST,  
+    user: process.env.DB_USER,  
+    password: process.env.DB_PASSWORD,  
+    database: process.env.DB_NAME,  
+    port: process.env.DB_PORT,  
 });  
 
-module.exports = pool;  
-
+module.exports = pool.promise();  // Ensure that you are exporting the pool with promise support  
