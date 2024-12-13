@@ -1,26 +1,31 @@
-require("dotenv").config();  
-const express = require("express");  
-const cors = require("cors");  
-const userRoutes = require("./routes/userRoutes");  
-const postRoutes = require("./routes/postRoutes");  
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const userRoutes = require("./routes/userRoutes");
+const postRoutes = require("./routes/postRoutes");
+const db = require("./config/db");
 
-const app = express();  
+// Load environment variables
+dotenv.config();
 
-// Middleware  
-app.use(cors());  
-app.use(express.json());  
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Routes  
-app.use("/api/users", userRoutes);  
-app.use("/api/posts", postRoutes);  
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Test endpoint  
-app.get("/", (req, res) => {  
-  res.send("API is running!");  
-});  
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
-// Start server  
-const PORT = process.env.PORT || 5000;  
-app.listen(PORT, () => {  
-  console.log(`Server running on port ${PORT}`);  
+// Test endpoint
+app.get("/", (req, res) => {
+  res.send("API is running!");
+});
+
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
