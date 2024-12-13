@@ -27,41 +27,42 @@ const signup = async (req, res) => {
 };  
 
 
-
 // Login function  
 const login = async (req, res) => {  
-    try {  
-        const { username, password } = req.body;  
+  try {  
+      const { username, password } = req.body;  
 
-        // Validate input  
-        if (!username || !password) {  
-            return res.status(400).json({ error: "username and password are required." });  
-        }  
+      // Validate input  
+      if (!username || !password) {  
+          return res.status(400).json({ error: "Username and password are required." });  
+      }  
 
-        // Check if the user exists  
-        const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);  
-        if (rows.length === 0) {  
-            return res.status(401).json({ error: "Invalid username or password." });  
-        }  
+      // Check if the user exists  
+      const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);  
+      if (rows.length === 0) {  
+          return res.status(401).json({ error: "Invalid username or password." });  
+      }  
 
-        const user = rows[0];  
+      const user = rows[0];  
 
-        // Compare the hashed password  
-        const isPasswordValid = await bcrypt.compare(password, user.password);  
-        if (!isPasswordValid) {  
-            return res.status(401).json({ error: "Invalid username or password." });  
-        }  
+      // Compare the hashed password  
+      const isPasswordValid = await bcrypt.compare(password, user.password);  
+      if (!isPasswordValid) {  
+          return res.status(401).json({ error: "Invalid username or password." });  
+      }  
 
-        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
+      // Generate JWT token
+      const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
           expiresIn: "1h", 
-        });
+      });
 
-        res.status(200).json({ message: "Login successful." /*, token */ });  
-    } catch (error) {  
-        console.error("Error during login:", error);  
-        res.status(500).json({ error: "An error occurred during login." });  
-    }  
-};  
+      // Return success response with token
+      res.status(200).json({ message: "Login successful.", token });  
+  } catch (error) {  
+      console.error("Error during login:", error);  
+      res.status(500).json({ error: "An error occurred during login." });  
+  }  
+};
 
 
 module.exports = { signup, login };
