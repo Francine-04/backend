@@ -7,25 +7,27 @@ const signup = async (req, res) => {
       const { fullname, username, password } = req.body;  
 
       // Validate input (add validation as needed)  
-      if (!fullname || !username|| !password) {  
+      if (!fullname || !username || !password) {  
           return res.status(400).json({ error: "All fields are required." });  
       }  
 
       // Check if the user already exists  
       const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);  
       if (rows.length > 0) {  
-          return res.status(400).json({ error: "User already exists." });  
+          return res.status(400).json({ error: "User  already exists." });  
       }  
 
-      // Create the new user (ensure you hash the password in a real app)  
-      await db.execute("INSERT INTO users (fullname, username, password) VALUES (?, ?, ?)", [fullname, username, password]);  
-      res.status(201).json({ message: "User registered successfully." });  
+      // Hash the password before storing it
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create the new user with the hashed password
+      await db.execute("INSERT INTO users (fullname, username, password) VALUES (?, ?, ?)", [fullname, username, hashedPassword]);  
+      res.status(201).json({ message: "User  registered successfully." });  
   } catch (error) {  
       console.error("Error during signup:", error);  
       res.status(500).json({ error: "An error occurred during signup." });  
   }  
 };  
-
 
 // Login function  
 const login = async (req, res) => {  
@@ -63,6 +65,5 @@ const login = async (req, res) => {
       res.status(500).json({ error: "An error occurred during login." });  
   }  
 };
-
 
 module.exports = { signup, login };
