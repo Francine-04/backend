@@ -12,7 +12,7 @@ const signup = async (req, res) => {
       }  
 
       // Check if the user already exists  
-      const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);  
+      const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);  
       if (rows.length > 0) {  
           return res.status(400).json({ error: "User already exists." });  
       }  
@@ -34,12 +34,12 @@ const login = async (req, res) => {
         const { username, password } = req.body;  
 
         // Validate input  
-        if (!email || !password) {  
+        if (!username || !password) {  
             return res.status(400).json({ error: "username and password are required." });  
         }  
 
         // Check if the user exists  
-        const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [username]);  
+        const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);  
         if (rows.length === 0) {  
             return res.status(401).json({ error: "Invalid username or password." });  
         }  
