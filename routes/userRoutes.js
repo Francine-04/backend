@@ -1,10 +1,11 @@
+// routes/userRoutes.js  
 const express = require("express");  
 const bcrypt = require("bcryptjs");  
 const jwt = require("jsonwebtoken");  
-const db = require("../db");  
+const pool = require("../db");  
 
 const router = express.Router();  
-const SECRET_KEY = process.env.JWT_SECRET;  
+const SECRET_KEY = process.env.JWT_SECRET; // Ensure this key is set in .env file  
 
 // Sign-up a new user  
 router.post("/signup", async (req, res) => {  
@@ -16,21 +17,16 @@ router.post("/signup", async (req, res) => {
 
   try {  
     const hashedPassword = await bcrypt.hash(password, 10);  
-    const query = "INSERT INTO users (fullname, username, password) VALUES (?, ?, ?)";  
+    const sql = "INSERT INTO users (fullname, username, password) VALUES (?, ?, ?)";  
+    const [result] = await pool.execute(sql, [fullname, username, hashedPassword]);  
 
-    db.query(query, [fullname, username, hashedPassword], (err, result) => {  
-      if (err) {  
-        if (err.code === "ER_DUP_ENTRY") {  
-          return res.status(409).json({ error: "Username already exists" });  
-        }  
-        console.error("Database error:", err);  
-        return res.status(500).json({ error: "Failed to register user" });  
-      }  
-      res.status(201).json({ message: "User registered successfully" });  
-    });  
-  } catch (error) {  
-    console.error("Error during signup:", error);  
-    res.status(500).json({ error: "Internal server error" });  
+    res.status(201).json({ message: "User registered successfully" });  
+  } catch (err) {  
+    if (err.code === "ER_DUP_ENTRY") {  
+      return res.status(409).json({ error: "Username already exists" });  
+    }  
+    console.error("Database error:", err);  
+    res.status(500).json({ error: "Failed to register user" });  
   }  
 });  
 
@@ -43,30 +39,27 @@ router.post("/login", async (req, res) => {
   }  
 
   try {  
-    const query = "SELECT * FROM users WHERE username = ?";  
-    db.query(query, [username], async (err, results) => {  
-      if (err) {  
-        console.error("Database error:", err);  
-        return res.status(500).json({ error: "Login failed" });  
-      }  
-      if (results.length === 0) {  
-        return res.status(404).json({ error: "User not found" });  
-      }  
+    const sql = "SELECT * FROM users WHERE username = ?";  
+    const [results] = await pool.execute(sql, [username]);  
 
-      const user = results[0];  
-      const isValid = await bcrypt.compare(password, user.password);  
-      if (!isValid) {  
-        return res.status(401).json({ error: "Invalid credentials" });  
-      }  
+    if (results.length === 0) {  
+      return res.status(404).json({ error: "User not found" });  
+    }  
 
-      const token = jwt.sign(  
-        { id: user.id, username: user.username, fullname: user.fullname },  
-        SECRET_KEY,  
-        { expiresIn: process.env.JWT_ACCESS_EXPIRATION_TIME } // Use environment variable  
-      );  
+    const user = results[0];  
+    const isValid = await bcrypt.compare(password, user.password);  
 
-      res.json({ token, fullname: user.fullname, username: user.username });  
-    });  
+    if (!isValid) {  
+      return res.status(401).json({ error: "Invalid credentials" });  
+    }  
+
+    const token = jwt.sign(  
+      { id: user.id, username: user.username, fullname: user.fullname },  
+      SECRET_KEY,  
+      { expiresIn: "24h" }  
+    );  
+
+    res.json({ token, fullname: user.fullname, username: user.username });  
   } catch (error) {  
     console.error("Error during login:", error);  
     res.status(500).json({ error: "Internal server error" });  
