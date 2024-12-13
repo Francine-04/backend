@@ -4,7 +4,6 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const db = require("./config/db");
-const morgan = require("morgan");
 
 // Load environment variables
 dotenv.config();
