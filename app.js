@@ -3,7 +3,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
-const db = require("./config/db"); // Import the database pool
+const accountRoutes = require("./routes/accountRoutes"); 
+const db = require("./config/db"); 
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/accounts", accountRoutes); 
 
 // Test endpoint
 app.get("/", (req, res) => {

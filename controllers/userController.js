@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const db = require("../config/db"); // Import the database pool
+const db = require("../config/db"); 
 
 // Signup function
 const signup = async (req, res) => {
