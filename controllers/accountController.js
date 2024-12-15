@@ -81,47 +81,51 @@ const getAllAccounts = async (req, res) => {
   }
 };
 
-// // Get a specific account (assuming user can access their own account)
-// const getAccount = async (req, res) => {
-//   const { id } = req.params;
+const getAccount = async (req, res) => {
+  const { id } = req.params;
 
-//   try {
-//     const sql = "SELECT * FROM accounts WHERE id = ?";
-//     const [results] = await db.query(sql, [id]);
+  try {
+      // Query users table
+      const sql = "SELECT * FROM users WHERE id = ?";
+      const [results] = await db.query(sql, [id]);
 
-//     if (results.length === 0 || results[0].id !== req.user.id) {
-//       return res.status(404).json({ message: "Account not found or unauthorized" });
-//     }
+      if (results.length === 0 || results[0].id !== req.user.id) {
+          return res.status(404).json({ message: "Account not found or unauthorized" });
+      }
 
-//     res.json(results[0]); // Return only the first account (assuming unique ID)
-//   } catch (err) {
-//     console.error("Error fetching account:", err);
-//     return res.status(500).json({ message: "Database error", error: err });
-//   }
-// };
+      res.json(results[0]); // Return only the first account (assuming unique ID)
+  } catch (err) {
+      console.error("Error fetching account:", err);
+      return res.status(500).json({ message: "Database error", error: err });
+  }
+};
 
 // Update an account (assuming user can update their own account)
 const updateAccount = async (req, res) => {
   const { id } = req.params;
   const { username, avatar } = req.body;
 
+  // Ensure the user is authorized to update their own account
+  if (id !== req.user.id) {
+      return res.status(403).json({ error: "You are not authorized to update this account" });
+  }
+
   if (!username || !avatar) {
-    return res.status(400).json({ error: "Username and avatar are required" });
+      return res.status(400).json({ error: "Username and avatar are required" });
   }
 
   try {
-    const sql = "UPDATE accounts SET username = ?, avatar = ? WHERE id = ?";
-    const [result] = await db.query(sql, [username, avatar, id]);
+      const sql = "UPDATE users SET username = ?, avatar = ? WHERE id = ?";
+      const [result] = await db.query(sql, [username, avatar, id]);
 
-    if (result.affectedRows === 0 || result.affectedRows !== 1) {
-      // Check for both affected rows (update might fail due to other reasons)
-      return res.status(404).json({ message: "Account not found or unauthorized" });
-    }
+      if (result.affectedRows === 0 || result.affectedRows !== 1) {
+          return res.status(404).json({ message: "Account not found or unauthorized" });
+      }
 
-    res.json({ message: "Account updated successfully" });
+      res.json({ message: "Account updated successfully" });
   } catch (err) {
-    console.error("Error updating account:", err);
-    return res.status(500).json({ message: "Database error", error: err });
+      console.error("Error updating account:", err);
+      return res.status(500).json({ message: "Database error", error: err });
   }
 };
 
@@ -129,19 +133,24 @@ const updateAccount = async (req, res) => {
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
 
+  // Ensure the user is authorized to delete their own account
+  if (id !== req.user.id) {
+      return res.status(403).json({ error: "You are not authorized to delete this account" });
+  }
+
   try {
-    const sql = "DELETE FROM accounts WHERE id = ?";
-    const [result] = await db.query(sql, [id]);
+      const sql = "DELETE FROM users WHERE id = ?";
+      const [result] = await db.query(sql, [id]);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Account not found or unauthorized" });
-    }
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: "Account not found or unauthorized" });
+      }
 
-    res.json({ message: "Account deleted successfully" });
+      res.json({ message: "Account deleted successfully" });
   } catch (err) {
-    console.error("Error deleting account:", err);
-    return res.status(500).json({ message: "Database error", error: err });
+      console.error("Error deleting account:", err);
+      return res.status(500).json({ message: "Database error", error: err });
   }
 };
 
-module.exports = {signup, login, getAllAccounts, updateAccount, deleteAccount,};
+module.exports = {signup, login, getAllAccounts, getAccount, updateAccount, deleteAccount,};
