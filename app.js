@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173", // Frontend origin
+  origin: "https://backend-n41a.onrender.com", // Frontend origin
   credentials: true,
 }));
 
