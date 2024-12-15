@@ -71,14 +71,14 @@ const login = async (req, res) => {
 
 
 const getAllAccounts = async (req, res) => {
-  try {
-      // Fetch all accounts
-      const [rows] = await db.execute("SELECT id, fullname, username, created_at FROM users");
-      res.status(200).json({ users: rows });
-  } catch (error) {
-      console.error("Error fetching accounts:", error);
-      res.status(500).json({ error: "An error occurred while fetching accounts." });
-  }
+    try {
+        console.log("Fetching all accounts..."); // Debugging log
+        const [rows] = await db.execute("SELECT id, fullname, username, created_at FROM users");
+        res.status(200).json({ users: rows });
+    } catch (error) {
+        console.error("Error fetching accounts:", error);
+        res.status(500).json({ error: "An error occurred while fetching accounts." });
+    }
 };
 
 const getAccount = async (req, res) => {
