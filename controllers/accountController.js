@@ -103,17 +103,22 @@ const getAccount = async (req, res) => {
 // Update an account (assuming user can update their own account)
 const updateAccount = async (req, res) => {
     const { id } = req.params;
-    const { username, avatar } = req.body;
+    const { username, fullname, avatar } = req.body; // Make sure to include fullname here
   
     // Check if username is provided
     if (!username) {
         return res.status(400).json({ error: "Username is required" });
     }
+
+    // Check if fullname is provided
+    if (!fullname) {
+        return res.status(400).json({ error: "Fullname is required" });
+    }
   
     try {
         // Prepare the SQL query
-        let sql = "UPDATE users SET username = ?";
-        const params = [username];
+        let sql = "UPDATE users SET username = ?, fullname = ?";
+        const params = [username, fullname]; // Initialize params with username and fullname
   
         // If avatar is provided, include it in the query
         if (avatar) {
@@ -121,8 +126,8 @@ const updateAccount = async (req, res) => {
             params.push(avatar);
         }
         
-        sql += " WHERE id = ?";
-        params.push(id);
+        sql += " WHERE id = ?"; // Complete the SQL query with a WHERE clause
+        params.push(id); // Add id to params to specify which user to update
   
         const [result] = await db.query(sql, params);
   
@@ -135,7 +140,7 @@ const updateAccount = async (req, res) => {
         console.error("Error updating account:", err);
         return res.status(500).json({ message: "Database error", error: err });
     }
-  };
+};
 
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
