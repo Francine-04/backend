@@ -129,9 +129,13 @@ const updateAccount = async (req, res) => {
   }
 };
 
-// Delete an account (assuming user can delete their own account)
+
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
+
+  // Log the values for debugging
+  console.log(`Trying to delete account with ID: ${id}`);
+  console.log(`Logged-in user ID: ${req.user.id}`);
 
   // Ensure the user is authorized to delete their own account
   if (id !== req.user.id) {
