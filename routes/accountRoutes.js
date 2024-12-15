@@ -7,8 +7,8 @@ const router = express.Router();
 // Routes
 router.post("/signup", signup);       // Signup route
 router.post("/login", login);         // Login route
-router.get("/all", authenticateToken, getAllAccounts);   // Get all accounts
-router.get("/all", authenticateToken, getAccount);   // 
+router.get("/", authenticateToken, getAllAccounts);   // Get all accounts
+router.get("/:id", authenticateToken, getAccount);   // 
 router.put("/:id", authenticateToken, updateAccount);    // Update an account
 router.delete("/:id", authenticateToken, deleteAccount); // Delete an account
 
