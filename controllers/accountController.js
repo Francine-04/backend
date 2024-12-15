@@ -102,28 +102,40 @@ const getAccount = async (req, res) => {
 
 // Update an account (assuming user can update their own account)
 const updateAccount = async (req, res) => {
-  const { id } = req.params;
-  const { username, avatar } = req.body;
-
-  if (!username || !avatar) {
-      return res.status(400).json({ error: "Username and avatar are required" });
-  }
-
-  try {
-      const sql = "UPDATE users SET username = ?, avatar = ? WHERE id = ?";
-      const [result] = await db.query(sql, [username, avatar, id]);
-
-      if (result.affectedRows === 0 || result.affectedRows !== 1) {
-          return res.status(404).json({ message: "Account not found" });
-      }
-
-      res.json({ message: "Account updated successfully" });
-  } catch (err) {
-      console.error("Error updating account:", err);
-      return res.status(500).json({ message: "Database error", error: err });
-  }
-};
-
+    const { id } = req.params;
+    const { username, avatar } = req.body;
+  
+    // Check if username is provided
+    if (!username) {
+        return res.status(400).json({ error: "Username is required" });
+    }
+  
+    try {
+        // Prepare the SQL query
+        let sql = "UPDATE users SET username = ?";
+        const params = [username];
+  
+        // If avatar is provided, include it in the query
+        if (avatar) {
+            sql += ", avatar = ?";
+            params.push(avatar);
+        }
+        
+        sql += " WHERE id = ?";
+        params.push(id);
+  
+        const [result] = await db.query(sql, params);
+  
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+  
+        res.json({ message: "Account updated successfully" });
+    } catch (err) {
+        console.error("Error updating account:", err);
+        return res.status(500).json({ message: "Database error", error: err });
+    }
+  };
 
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
