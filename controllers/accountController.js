@@ -105,11 +105,6 @@ const updateAccount = async (req, res) => {
   const { id } = req.params;
   const { username, avatar } = req.body;
 
-  // Ensure the user is authorized to update their own account
-  if (id !== req.user.id) {
-      return res.status(403).json({ error: "You are not authorized to update this account" });
-  }
-
   if (!username || !avatar) {
       return res.status(400).json({ error: "Username and avatar are required" });
   }
@@ -119,7 +114,7 @@ const updateAccount = async (req, res) => {
       const [result] = await db.query(sql, [username, avatar, id]);
 
       if (result.affectedRows === 0 || result.affectedRows !== 1) {
-          return res.status(404).json({ message: "Account not found or unauthorized" });
+          return res.status(404).json({ message: "Account not found" });
       }
 
       res.json({ message: "Account updated successfully" });
@@ -133,21 +128,12 @@ const updateAccount = async (req, res) => {
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
 
-  // Log the values for debugging
-  console.log(`Trying to delete account with ID: ${id}`);
-  console.log(`Logged-in user ID: ${req.user.id}`);
-
-  // Ensure the user is authorized to delete their own account
-  if (id !== req.user.id) {
-      return res.status(403).json({ error: "You are not authorized to delete this account" });
-  }
-
   try {
       const sql = "DELETE FROM users WHERE id = ?";
       const [result] = await db.query(sql, [id]);
 
       if (result.affectedRows === 0) {
-          return res.status(404).json({ message: "Account not found or unauthorized" });
+          return res.status(404).json({ message: "Account not found" });
       }
 
       res.json({ message: "Account deleted successfully" });
